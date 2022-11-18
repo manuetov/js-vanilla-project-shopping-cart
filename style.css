@@ -63,7 +63,7 @@ body {
 .hero {
    min-height: calc(100vh - 60px);
    /* 100% - navbar height */
-   background: url("./images/hero-bcg.jpeg") center/cover no-repeat;
+   background: url("./images/hero.jpg") center/cover no-repeat;
    display: flex;
    align-items: center;
    justify-content: center;
@@ -117,16 +117,17 @@ body {
 }
 
 .products-center {
-   width: 90vw;
+   width: 95vw;
    margin: 0 auto;
    max-width: 1170px;
    display: grid;
-   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
    grid-column-gap: 1.5rem;
    grid-row-gap: 2rem;
 }
 
 .img-container {
+   height: 65%;
    position: relative;
    overflow: hidden;
 }
@@ -230,6 +231,7 @@ body {
       width: 30vw;
       min-width: 450px;
    }
+
 }
 
 .close-cart {

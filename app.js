@@ -1,3 +1,12 @@
+// Contentful
+// const contentful = require('contentful')
+const client = contentful.createClient({
+  space: 'lo96wev1htvd',
+  accessToken: 'qH8sRf9NdJx9p8fXU739syyoXMzMU9Zj_Z5eVcN70Ho'
+})
+
+console.log(client);
+
 // variables
 const iconCart = document.querySelector(".nav-icon-cart"); // nav icon
 const cartItems = document.querySelector(".cart-items"); // nav items amount
@@ -21,9 +30,17 @@ let buttonsDOM = [];
 class Products {
   async getProducts() {
     try {
-      let result = await fetch("products.json");
-      let data = await result.json();
-      let products = data.items;
+
+      let contentful = await client.getEntries({
+        content_type: "decoHouse"
+      })
+      console.log(contentful);
+
+      // let result = await fetch("products.json");
+      // let data = await result.json();
+      // let products = data.items;
+
+      let products = contentful.items;
       //destructuring
       products = products.map((item) => {
         const { title, price } = item.fields;
