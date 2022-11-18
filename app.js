@@ -1,15 +1,15 @@
 // variables
-
-const cartItems = document.querySelector(".cart-items"); // nav
+const iconCart = document.querySelector(".nav-icon-cart"); // nav icon
+const cartItems = document.querySelector(".cart-items"); // nav items amount
 // products-center
 const productsCenterDOM = document.querySelector(".products-center");
 // your cart overlay
 const cartOverlayDOM = document.querySelector(".cart-overlay");
 const cartSummaryDOM = document.querySelector(".cart-summary"); //cart
 const closeCartBtn = document.querySelector(".close-cart");
-const cartContent = document.querySelector(".cart-content");
+const cartContent = document.querySelector(".cart-content"); // cart items
 const cartBtn = document.querySelector(".cart-btn");
-const cartTotal = document.querySelector(".cart-total") 
+const cartTotal = document.querySelector(".cart-total");
 const clearCartBtn = document.querySelector(".clear-cart");
 
 // array cart items saved in localstore
@@ -65,15 +65,15 @@ class UI {
 
   getAddButtons() {
     const addButtons = [...document.querySelectorAll(".add-btn")];
-    //  console.log(addButtons)
-    // add all nodeslist of bottons in an empty array
-    // buttonsDOM = buttons
+    // console.log(addButtons)
+    // add all bottons from products-center in an empty array buttonsDOM
+    buttonsDOM = addButtons;
     // find by id to show in cart or add to cart
-    addButtons.forEach(button => {
+    addButtons.forEach((button) => {
       let id = button.dataset.id; // atribute of each id button
       // console.log(id)
       // check if matched item is in the cart array
-      let inCart = cart.find(item => item.id === id);
+      let inCart = cart.find((item) => item.id === id);
       if (inCart) {
         button.innerText = "en el carrito";
         button.disabled = true;
@@ -90,33 +90,32 @@ class UI {
         // save cart in local Storage
         Storage.saveCart(cart);
         // set cart-summary values
-        this.setCartValues(cart)
+        this.setCartValues(cart);
         // display cart-sumary item added
-        this.addCartItem(cartItem)
+        this.addCartItem(cartItem);
         // show cart-summary
-        this.showCart()
+        this.showCart();
       });
     });
   }
 
-  setCartValues(cart){
-    let tempTotal = 0
-    let itemsTotal = 0
-    cart.map(item => {
-      tempTotal += item.price * item.amount
-      itemsTotal += item.amount
-    })
+  setCartValues(cart) {
+    let tempTotal = 0;
+    let itemsTotal = 0;
+    cart.map((item) => {
+      tempTotal += item.price * item.amount;
+      itemsTotal += item.amount;
+    });
     // writing data accessing DOM selectors
-    cartTotal.innerText = parseFloat(tempTotal.toFixed(2))
-    cartItems.innerText = itemsTotal
+    cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
+    cartItems.innerText = itemsTotal;
     // console.log(cartTotal, cartItems)
   }
-
   // display add cart items in cart-summary
   addCartItem(cartItem) {
-    const div = document.createElement('div')
-    div.classList.add('cart-item')
-      div.innerHTML = ` <img src=${cartItem.image} alt="product">
+    const div = document.createElement("div");
+    div.classList.add("cart-item");
+    div.innerHTML = ` <img src=${cartItem.image} alt="product">
       <div>
         <h4>${cartItem.title}</h4>
         <h5>${cartItem.price} €</h5>
@@ -125,21 +124,109 @@ class UI {
       <div>
         <i class="fa fa-chevron-up" data-id=${cartItem.id}></i>
         <p class="item-amount">${cartItem.amount}</p>
-        <i class="fa fa-chevron-down"></i>
+        <i class="fa fa-chevron-down" data-id=${cartItem.id}></i>
       </div>
-      `
-    cartContent.appendChild(div)
-    console.log(cartContent)
+      `;
+    cartContent.appendChild(div);
+    console.log(cartContent);
   }
-
   // display cartOverlayDom with cartSummaryDom when some item is added to cart
   showCart() {
-    // add classes from css
-    cartOverlayDOM.classList.add('transparentBcg')
-    cartSummaryDOM.classList.add('showCart')
+    // add classes from css into DOM
+    cartOverlayDOM.classList.add("transparentBcg");
+    cartSummaryDOM.classList.add("showCart");
+  }
+  // check the cart in the local storage when an user visit the page
+  setupAPP() {
+    cart = Storage.getCart();
+    this.setCartValues(cart); // pass cart to calculate values
+    this.populate(cart); // populate add items into cart
+    closeCartBtn.addEventListener("click", this.hideCart);
+    cartItems.addEventListener("click", this.showCart);
+    iconCart.addEventListener("click", this.showCart);
+  }
+  populate(cart) {
+    cart.forEach((item) => this.addCartItem(item));
+  }
+  hideCart() {
+    // remove classes from css into DOM
+    cartOverlayDOM.classList.remove("transparentBcg");
+    cartSummaryDOM.classList.remove("showCart");
+  }
+  cartLogic() {
+    // clear cart button
+    clearCartBtn.addEventListener("click", () => {
+      this.clearCart();
+    });
+    // cart funtionality
+    // clear on items
+    cartContent.addEventListener("click", (event) => {
+      // console.log(event.target);
+      if (event.target.classList.contains("remove-item")) {
+        let removeItem = event.target;
+        let id = removeItem.dataset.id;
+        this.removeItem(id); // remove item without DOM
+        // remove child item with DOM included
+        cartContent.removeChild(removeItem.parentElement.parentElement);
+        // increment or decrement amount
+      } else if (event.target.classList.contains("fa-chevron-up")) {
+        let addAmount = event.target;
+        let id = addAmount.dataset.id;
+        let tempItem = cart.find((item) => item.id === id);
+        tempItem.amount = tempItem.amount + 1;
+        // use static method to push de new amount/increase into localStorage
+        Storage.saveCart(cart);
+        // use setCartValues to calculate de price
+        this.setCartValues(cart);
+        // the property nexElementSibling return de next node/hijo
+        // increase the node class item-amount from DOM
+        addAmount.nextElementSibling.innerText = tempItem.amount;
+      } else if (event.target.classList.contains("fa-chevron-down")) {
+        let lowerAmount = event.target;
+        let id = lowerAmount.dataset.id;
+        let tempItem = cart.find((item) => item.id === id);
+        console.log(tempItem);
+        tempItem.amount = tempItem.amount - 1;
+        if (tempItem.amount > 0) {
+          Storage.saveCart(cart);
+          this.setCartValues(cart);
+          lowerAmount.previousElementSibling.innerText = tempItem.amount;
+        } else {
+          cartContent.removeChild(lowerAmount.parentElement.parentElement);
+          this.removeItem(id);
+        }
+      }
+    });
+  }
+  // clear all items
+  clearCart() {
+    // new array with all the items ids into the cart
+    let cartItems = cart.map((item) => item.id);
+    // all items ids that want to remove from cart
+    cartItems.forEach((id) => this.removeItem(id));
+    // remove all items into contentCart from the DOM
+    while (cartContent.children.length > 0) {
+      cartContent.removeChild(cartContent.children[0]);
+    }
+    this.hideCart();
+  }
+  removeItem(id) {
+    // all items are remove, because there're not any diferent ids
+    cart = cart.filter((item) => item.id !== id);
+    // empty the cart with no items
+    this.setCartValues(cart); // empty cart
+    Storage.saveCart(cart); // empty array Local Storage
+    let button = this.getSingleButton(id); // products-center buttons
+    button.disabled = false;
+    button.innerHTML = ` 
+    <i class="fa fa-shopping-cart"></i>
+    añadir al carrito
+    `;
+  }
+  getSingleButton(id) {
+    return buttonsDOM.find((button) => button.dataset.id === id);
   }
 }
-
 //local storage
 class Storage {
   // static method no need to be instance like a new object
@@ -155,12 +242,20 @@ class Storage {
   static saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }
+  // at the moment the app is loaded return the items saved in the
+  // array on local storage if its exist or an emty array
+  static getCart() {
+    return localStorage.getItem("cart")
+      ? JSON.parse(localStorage.getItem("cart"))
+      : [];
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const ui = new UI();
   const products = new Products();
-
+  // at the moment de app/content is loaded check cart in local Storage
+  ui.setupAPP();
   products
     .getProducts()
     .then((products) => {
@@ -172,5 +267,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(() => {
       // after products are display in 85, already can access to class add-btn in 50
       ui.getAddButtons();
+      ui.cartLogic();
     });
 });

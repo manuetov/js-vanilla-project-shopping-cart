@@ -40,7 +40,7 @@ body {
    justify-content: space-between;
    padding: 0 1.5rem;
 }
-.nav-icon {
+.nav-icon-bars, .nav-icon-cart {
    font-size: 1.5rem;
 }
 
